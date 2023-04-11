@@ -1,0 +1,82 @@
+# Import necessary modules
+import pygame
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Set up the game window
+screen_width = 800
+screen_height = 600
+game_window = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption("Racing Game")
+
+# Define game variables
+clock = pygame.time.Clock()
+car_image = pygame.image.load("car.png")
+car_width = 50
+car_height = 100
+car_x = (screen_width / 2) - (car_width / 2)
+car_y = screen_height - car_height - 10
+car_speed = 5
+enemy_image = pygame.image.load("enemy.png")
+enemy_width = 50
+enemy_height = 100
+enemy_x = random.randint(0, screen_width - enemy_width)
+enemy_y = -enemy_height
+enemy_speed = 3
+score = 0
+font = pygame.font.SysFont(None, 30)
+
+# Define functions
+def draw_text(text, color, x, y):
+    text_surface = font.render(text, True, color)
+    game_window.blit(text_surface, (x, y))
+
+def detect_collision(car_x, car_y, enemy_x, enemy_y):
+    car_rect = pygame.Rect(car_x, car_y, car_width, car_height)
+    enemy_rect = pygame.Rect(enemy_x, enemy_y, enemy_width, enemy_height)
+    if car_rect.colliderect(enemy_rect):
+        return True
+    else:
+        return False
+
+# Start the game loop
+game_over = False
+while not game_over:
+    # Handle events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            game_over = True
+    
+    # Move the car
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT] and car_x > 0:
+        car_x -= car_speed
+    if keys[pygame.K_RIGHT] and car_x < screen_width - car_width:
+        car_x += car_speed
+    
+    # Move the enemy
+    enemy_y += enemy_speed
+    if enemy_y > screen_height:
+        enemy_x = random.randint(0, screen_width - enemy_width)
+        enemy_y = -enemy_height
+        score += 1
+        enemy_speed += 0.1
+    
+    # Detect collision
+    if detect_collision(car_x, car_y, enemy_x, enemy_y):
+        game_over = True
+    
+    # Draw the game objects
+    game_window.fill((255, 255, 255))
+    game_window.blit(car_image, (car_x, car_y))
+    game_window.blit(enemy_image, (enemy_x, enemy_y))
+    draw_text("Score: " + str(score), (0, 0, 0), 10, 10)
+    
+    # Update the display and tick the clock
+    pygame.display.update()
+    clock.tick(60)
+
+# Clean up Pygame and exit
+pygame.quit()
